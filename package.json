@@ -1,0 +1,63 @@
+{
+  "name": "trainer-ppt-generator",
+  "version": "0.1.0",
+  "description": "Local-first desktop app for building trainer exercise PowerPoint programs.",
+  "author": "EX4L",
+  "private": true,
+  "main": "electron/main.cjs",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace server\" \"npm run dev --workspace client\"",
+    "dev:server": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "build": "npm run build --workspace server && npm run build --workspace client",
+    "start": "npm run start --workspace server",
+    "desktop:dev": "npm run build && electron .",
+    "desktop:pack": "npm run build && electron-builder --dir",
+    "desktop:dist:mac": "npm run build && electron-builder --mac dmg"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "electron": "^30.5.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.ex4l.trainerpptgenerator",
+    "productName": "Trainer PPT Generator",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "server/dist/**/*",
+      "client/dist/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "server/dist/*.wasm"
+    ],
+    "mac": {
+      "category": "public.app-category.healthcare-fitness",
+      "target": [
+        "dmg"
+      ]
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,13 @@
+.DS_Store
+.claude/
+node_modules/
+dist/
+.env
+.tools/
+release/
+desktop-smoke-data/
+server/data/
+server/tmp_uploads/
+tmp_uploads/
+output/*.pptx
+*.log
