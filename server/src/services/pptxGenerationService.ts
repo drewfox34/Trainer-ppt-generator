@@ -507,7 +507,9 @@ async function buildDeck(programId: number, mode: PptxMode) {
   };
 
   addTitleSlide(pptx, program);
+  addOverviewSlide(pptx, program, exercises);
   exercises.forEach((exercise, index) => addExerciseSlide(pptx, program, exercise, index, exercises.length, mode, warnings));
+  addFinalNotesSlide(pptx, program);
 
   const dateStamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
   const fileName = `${sanitizeFileName(program.client_name)} - ${sanitizeFileName(program.program_name)} - ${dateStamp}.pptx`;
