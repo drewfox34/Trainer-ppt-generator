@@ -23,6 +23,11 @@ async function build() {
     path.join(serverDist, "schema.sql")
   );
 
+  fs.copyFileSync(
+    path.join(serverSrc, "assets", "ex4l-logo.png"),
+    path.join(serverDist, "ex4l-logo.png")
+  );
+
   // wasm must sit next to the bundle so electron-builder can unpack it
   fs.copyFileSync(
     path.join(root, "node_modules", "sql.js", "dist", "sql-wasm.wasm"),

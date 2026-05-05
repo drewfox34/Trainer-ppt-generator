@@ -8,6 +8,16 @@ import { fileExistsFromProjectPath, toLinkTarget, validateMediaPaths } from "./m
 
 export type PptxMode = "linked" | "embedded";
 
+function getLogoPath(): string | null {
+  // Bundled production path (server/dist/ex4l-logo.png next to bundle.cjs)
+  const distPath = path.join(__dirname, "ex4l-logo.png");
+  if (fs.existsSync(distPath)) return distPath;
+  // Dev path (server/src/assets/ex4l-logo.png relative to service file)
+  const srcPath = path.join(__dirname, "..", "assets", "ex4l-logo.png");
+  if (fs.existsSync(srcPath)) return srcPath;
+  return null;
+}
+
 const SLIDE_WIDTH = 13.333;
 const SLIDE_HEIGHT = 7.5;
 const MEDIA_SIZE = 7.5;
@@ -194,27 +204,7 @@ function addLinkedMedia(slide: PptxGenJS.Slide, exercise: ProgramExerciseWithExe
       sizing: { type: "cover", x: 0, y: 0, w: MEDIA_SIZE, h: SLIDE_HEIGHT }
     });
   } else {
-    slide.addText("Media", {
-      x: 0.75,
-      y: 3.02,
-      w: 6,
-      h: 0.42,
-      align: "center",
-      color: "8290A0",
-      fontSize: 24,
-      bold: true,
-      margin: 0
-    });
-    slide.addText(exercise.exercise_code || "Exercise", {
-      x: 0.75,
-      y: 3.5,
-      w: 6,
-      h: 0.24,
-      align: "center",
-      color: "A4ADB6",
-      fontSize: 11,
-      margin: 0
-    });
+    // plain branded placeholder — no content needed, logo watermark is on right panel
   }
 
   if (!exercise.thumbnail_path) {
@@ -300,6 +290,19 @@ function addExerciseSlide(
     fill: { color: "FFFFFF" },
     line: { color: "FFFFFF", transparency: 100 }
   });
+
+  const logoPath = getLogoPath();
+  if (logoPath) {
+    slide.addImage({
+      path: logoPath,
+      x: PANEL_X,
+      y: 0,
+      w: PANEL_W,
+      h: SLIDE_HEIGHT,
+      transparency: 88,
+      sizing: { type: "contain", x: PANEL_X, y: 0, w: PANEL_W, h: SLIDE_HEIGHT }
+    });
+  }
 
   const mediaWarnings = validateMediaPaths(exercise).warnings;
   warnings.push(...mediaWarnings);

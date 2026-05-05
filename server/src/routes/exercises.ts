@@ -1,9 +1,10 @@
 import fs from "fs";
+import path from "path";
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "../db";
 import { validateMediaPaths } from "../services/mediaValidationService";
-import { videosRoot, thumbnailsRoot } from "../paths";
+import { videosRoot, thumbnailsRoot, storageRoot } from "../paths";
 
 export const exercisesRouter = Router();
 
@@ -158,21 +159,32 @@ exercisesRouter.post("/auto-link-media", (_req, res) => {
 
   let linked = 0;
 
+  function matchesCode(filename: string, prefix: string) {
+    const f = filename.toLowerCase();
+    return f.startsWith(prefix + "_") || f.startsWith(prefix + " ") || f.startsWith(prefix + ".");
+  }
+
+  function fileExists(relPath: string | null) {
+    if (!relPath) return false;
+    const abs = path.join(storageRoot, relPath);
+    return fs.existsSync(abs);
+  }
+
   for (const ex of exercises) {
     const code = ex.exercise_code.trim();
     if (!code) continue;
     const prefix = code.toLowerCase();
 
-    if (!ex.video_path) {
-      const match = videoFiles.find(f => f.toLowerCase().startsWith(prefix + "_") || f.toLowerCase().startsWith(prefix + "."));
+    if (!ex.video_path || !fileExists(ex.video_path)) {
+      const match = videoFiles.find(f => matchesCode(f, prefix));
       if (match) {
         db.prepare("UPDATE exercises SET video_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(`media/videos/${match}`, ex.id);
         linked++;
       }
     }
 
-    if (!ex.thumbnail_path) {
-      const match = thumbFiles.find(f => f.toLowerCase().startsWith(prefix + "_") || f.toLowerCase().startsWith(prefix + "."));
+    if (!ex.thumbnail_path || !fileExists(ex.thumbnail_path)) {
+      const match = thumbFiles.find(f => matchesCode(f, prefix));
       if (match) {
         db.prepare("UPDATE exercises SET thumbnail_path = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(`media/thumbnails/${match}`, ex.id);
         linked++;
